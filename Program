@@ -1,0 +1,521 @@
+#include"Stdafx.h"
+#include <iostream>
+#include <string>
+#include <Windows.h>
+#include <fstream>
+struct Patient;
+struct FIO;
+struct HomeAddress;
+struct Medical_Data;
+
+Patient* InitArray(int Dimension);
+Patient InitPatient();
+void DisplayArray(Patient* Massive, int Dimaension);
+void DisplayChoise(Patient*, int, char*, int, int);
+void DisplayPatient(Patient);
+void SortFirstName(Patient*, int);
+int& CheckCorectDigitValue(int&);
+#define garbage_collector() cin.ignore(cin.rdbuf()->in_avail())
+
+using namespace std;
+/*
+5.«Пациент»:
+//фамилия; имя; отчество; пол;| национальность; рост; вес;| дата рождения (год,месяц число);| номер телефона; домашний адрес (почтовый индекс, страна,
+//область, район, город, улица, дом, квартира);| номер больницы; отделение; номер медицинской карты; диагноз; группа крови.
+*/
+struct FIO
+{
+	char FirstName[15],
+		SecondName[15],
+		LastName[15];
+};
+struct HomeAddress
+{
+	string zip_code, country,/* домашний адрес (почтовый индекс, страна,область, район, город, улица, дом, квартира)*/
+		region, district, city, street, house_or_apartment;
+};
+struct Medical_Data
+{
+	/*номер больницы; отделение; номер медицинской карты; диагноз; группа крови*/
+	unsigned int hospital_number,
+				 branch,
+				 medical_card_number,
+				 blood_type;
+	string		 diagnosis;
+};
+struct Patient
+{
+	FIO*		 _FIO;
+	char		 _nationality[20];
+	unsigned int height,
+				 weight;
+	string phone_number;
+	HomeAddress* _home_adress;
+	Medical_Data* medical_data;
+	
+
+	bool CheckPhoneNumber(string _phone_number);
+};
+bool Patient::CheckPhoneNumber(std::string _phone_number)
+{
+	string strTemplate = "(###) ###-####";
+	if (strTemplate.length() != _phone_number.length())
+		return false;
+
+	// Перебираем каждый символ пользовательского ввода
+	for (unsigned int nIndex = 0; nIndex < strTemplate.length(); nIndex++)
+	{
+		switch (strTemplate[nIndex])
+		{
+		case '#': // = цифра
+			if (!isdigit(_phone_number[nIndex]))
+				return false;
+			break;
+		case '_': // = пробел
+			if (!isspace(_phone_number[nIndex]))
+				return false;
+			break;
+		case '@': // = буква
+			if (!isalpha(_phone_number[nIndex]))
+				return false;
+			break;
+		case '?': // = вообще любой символ
+			break;
+		default: // = точное совпадание с символом
+			if (_phone_number[nIndex] != strTemplate[nIndex])
+				return false;
+		}
+	}
+
+	return true;
+}
+int main(int argc, char* argv)
+{
+	SetConsoleOutputCP(1251);
+	SetConsoleCP(1251);
+	setlocale(0, "");
+
+	int Dimension;
+	char SexTag[7];
+	int LowAge, UpperAge;
+	bool begin = true;
+tryagain:
+	Patient* MassiveStruct = nullptr;
+	do
+	{
+		cout << "\nEnter the number of persons]$~ ";
+		do {
+			cin >> Dimension;
+			if (cin.fail())
+			{
+				cout << "~$]Previous input failed, please re-enter !!!" << endl;
+				cin.clear();
+				cin.ignore(32222, '\n');
+			}
+			else
+				break;
+		} while (true);
+		MassiveStruct = InitArray(Dimension);
+		if (MassiveStruct == nullptr)
+		{
+			cout << "\n~$]Dynamic array don't exist!\n";
+
+			do {
+				cout << "~$]Введите '+' для того чтобы повторить попытку или нажмите '-' чтобы выйти из програмы... ";
+				char symbol;
+				symbol = getchar();
+				(symbol == '+') ? begin == true : begin == false;
+				if (symbol == '+')
+					goto tryagain;
+				exit(777);
+
+			} while (!begin);
+		}
+
+
+	} while (begin != true);
+
+	cout << "\nThe list of patient: ";
+	DisplayArray(MassiveStruct, Dimension);
+	
+	cout << "\nThe sorting list of patients: ";
+	SortFirstName(MassiveStruct, Dimension);
+	DisplayArray(MassiveStruct, Dimension);
+
+	delete MassiveStruct;
+
+}
+
+
+Patient InitPatient()
+{
+
+	Patient _Patient;
+	garbage_collector();
+	cout << "\nEnter first name:";
+	garbage_collector();
+	cin.getline(_Patient._FIO->FirstName, 25);
+	cout << "Enter second name:";
+	garbage_collector();
+	cin.getline(_Patient._FIO->SecondName, 25);
+	cout << "Enter last name:";
+	garbage_collector();
+	cin.getline(_Patient._FIO->LastName, 255);
+	cout << "Enter height and weight: ";
+	garbage_collector();
+	cin>>_Patient.height>>_Patient.weight;
+	while (1)
+	{
+		cout << "Enter a phone number (###) ###-####: ";
+		getline(cin, _Patient.phone_number); // извлекаем целую строку, включая пробелы
+		if (_Patient.CheckPhoneNumber(_Patient.phone_number))
+			break;
+	}
+	garbage_collector();
+	cout << "Enter home adress(street,home/apartament): ";
+	getline(cin,_Patient._home_adress->street);
+	getline(cin,_Patient._home_adress->house_or_apartment);
+	//cout<<"Medical data"
+	
+	return _Patient;
+
+}
+
+Patient* InitArray(int Dimension)
+{
+	Patient* Massive = new Patient[Dimension];
+	if (Massive == nullptr)
+		return nullptr;
+	for (size_t i = 0; i < Dimension; i++)
+	{
+		printf("\n]$~Enter the information about %d person ", i + 1);
+		Massive[i] = InitPatient();
+	}
+	return Massive;
+}
+
+void DisplayArray(Patient* Massive, int Dimension)
+{
+	for (size_t i = 0; i < Dimension; i++) { DisplayPatient(Massive[i]); }
+}
+#include"Stdafx.h"
+#include <iostream>
+#include <string>
+#include <Windows.h>
+#include <fstream>
+struct Patient;
+struct FIO;
+struct HomeAddress;
+struct Medical_Data;
+
+Patient* InitArray(int Dimension);
+Patient InitPatient();
+void DisplayArray(Patient* Massive, int Dimaension);
+void DisplayChoise(Patient*, int, char*, int, int);
+void DisplayPatient(Patient);
+void SortFirstName(Patient*, int);
+int& CheckCorectDigitValue(int&);
+#define garbage_collector() cin.ignore(cin.rdbuf()->in_avail())
+
+using namespace std;
+/*
+5.«Пациент»:
+//фамилия; имя; отчество; пол;| национальность; рост; вес;| дата рождения (год,месяц число);| номер телефона; домашний адрес (почтовый индекс, страна,
+//область, район, город, улица, дом, квартира);| номер больницы; отделение; номер медицинской карты; диагноз; группа крови.
+*/
+struct FIO
+{
+	char FirstName[15],
+		SecondName[15],
+		LastName[15];
+};
+struct HomeAddress
+{
+	string zip_code, country,/* домашний адрес (почтовый индекс, страна,область, район, город, улица, дом, квартира)*/
+		region, district, city, street, house_or_apartment;
+};
+struct Medical_Data
+{
+	/*номер больницы; отделение; номер медицинской карты; диагноз; группа крови*/
+	unsigned int hospital_number,
+				 branch,
+				 medical_card_number,
+				 blood_type;
+	string		 diagnosis;
+};
+struct Patient
+{
+	FIO*		 _FIO;
+	char		 _nationality[20];
+	unsigned int height,
+				 weight;
+	string phone_number;
+	HomeAddress* _home_adress;
+	Medical_Data* medical_data;
+	
+
+	bool CheckPhoneNumber(string _phone_number);
+};
+bool Patient::CheckPhoneNumber(std::string _phone_number)
+{
+	string strTemplate = "(###) ###-####";
+	if (strTemplate.length() != _phone_number.length())
+		return false;
+
+	// Перебираем каждый символ пользовательского ввода
+	for (unsigned int nIndex = 0; nIndex < strTemplate.length(); nIndex++)
+	{
+		switch (strTemplate[nIndex])
+		{
+		case '#': // = цифра
+			if (!isdigit(_phone_number[nIndex]))
+				return false;
+			break;
+		case '_': // = пробел
+			if (!isspace(_phone_number[nIndex]))
+				return false;
+			break;
+		case '@': // = буква
+			if (!isalpha(_phone_number[nIndex]))
+				return false;
+			break;
+		case '?': // = вообще любой символ
+			break;
+		default: // = точное совпадание с символом
+			if (_phone_number[nIndex] != strTemplate[nIndex])
+				return false;
+		}
+	}
+
+	return true;
+}
+int main(int argc, char* argv)
+{
+	SetConsoleOutputCP(1251);
+	SetConsoleCP(1251);
+	setlocale(0, "");
+
+	int Dimension;
+	char SexTag[7];
+	int LowAge, UpperAge;
+	bool begin = true;
+tryagain:
+	Patient* MassiveStruct = nullptr;
+	do
+	{
+		cout << "\nEnter the number of persons]$~ ";
+		do {
+			cin >> Dimension;
+			if (cin.fail())
+			{
+				cout << "~$]Previous input failed, please re-enter !!!" << endl;
+				cin.clear();
+				cin.ignore(32222, '\n');
+			}
+			else
+				break;
+		} while (true);
+		MassiveStruct = InitArray(Dimension);
+		if (MassiveStruct == nullptr)
+		{
+			cout << "\n~$]Dynamic array don't exist!\n";
+
+			do {
+				cout << "~$]Введите '+' для того чтобы повторить попытку или нажмите '-' чтобы выйти из програмы... ";
+				char symbol;
+				symbol = getchar();
+				(symbol == '+') ? begin == true : begin == false;
+				if (symbol == '+')
+					goto tryagain;
+				exit(777);
+
+			} while (!begin);
+		}
+
+
+	} while (begin != true);
+
+	cout << "\nThe list of patient: ";
+	DisplayArray(MassiveStruct, Dimension);
+	
+	cout << "\nThe sorting list of patients: ";
+	SortFirstName(MassiveStruct, Dimension);
+	DisplayArray(MassiveStruct, Dimension);
+
+	delete MassiveStruct;
+
+}
+
+
+Patient InitPatient()
+{
+
+	Patient _Patient;
+	garbage_collector();
+	cout << "\nEnter first name:";
+	garbage_collector();
+	cin.getline(_Patient._FIO->FirstName, 25);
+	cout << "Enter second name:";
+	garbage_collector();
+	cin.getline(_Patient._FIO->SecondName, 25);
+	cout << "Enter last name:";
+	garbage_collector();
+	cin.getline(_Patient._FIO->LastName, 255);
+	cout << "Enter height and weight: ";
+	garbage_collector();
+	cin>>_Patient.height>>_Patient.weight;
+	while (1)
+	{
+		cout << "Enter a phone number (###) ###-####: ";
+		getline(cin, _Patient.phone_number); // извлекаем целую строку, включая пробелы
+		if (_Patient.CheckPhoneNumber(_Patient.phone_number))
+			break;
+	}
+	garbage_collector();
+	cout << "Enter home adress(street,home/apartament): ";
+	getline(cin,_Patient._home_adress->street);
+	getline(cin,_Patient._home_adress->house_or_apartment);
+	//cout<<"Medical data"
+	
+	return _Patient;
+
+}
+
+Patient* InitArray(int Dimension)
+{
+	Patient* Massive = new Patient[Dimension];
+	if (Massive == nullptr)
+		return nullptr;
+	for (size_t i = 0; i < Dimension; i++)
+	{
+		printf("\n]$~Enter the information about %d person ", i + 1);
+		Massive[i] = InitPatient();
+	}
+	return Massive;
+}
+
+void DisplayArray(Patient* Massive, int Dimension)
+{
+	for (size_t i = 0; i < Dimension; i++) { DisplayPatient(Massive[i]); }
+}
+
+
+void DisplayPatient(Patient _Patient)
+{
+	printf("\n%s %s %s ", _Patient._FIO->FirstName, _Patient._FIO->SecondName, _Patient._FIO->LastName);
+}
+
+
+void SortFirstName(Patient* Massive, int Dimension)
+{
+	Patient Temp;
+	bool isEqualName	   = true,
+		 isEqualSecondName = true;
+	for (size_t i = 0; i <= Dimension; i++)
+	{
+		for (size_t q = Dimension - 1; q > i; q--)
+		{
+			if (strcmp(Massive[q]._FIO->FirstName, Massive[q - 1]._FIO->FirstName) < 0)
+			{
+				isEqualName = false;
+				Temp = Massive[q];
+				Massive[q] = Massive[q - 1];
+				Massive[q - 1] = Temp;
+			}
+			if (isEqualName && strcmp(Massive[q]._FIO->SecondName, Massive[q - 1]._FIO->SecondName) < 0)
+			{
+				isEqualSecondName = false;
+				Temp = Massive[q];
+				Massive[q] = Massive[q - 1];
+				Massive[q - 1] = Temp;
+			}
+			if (isEqualSecondName && strcmp(Massive[q]._FIO->LastName, Massive[q - 1]._FIO->LastName) < 0)
+			{
+				Temp = Massive[q];
+				Massive[q] = Massive[q - 1];
+				Massive[q - 1] = Temp;
+			}
+		}
+	}
+}
+int& CheckCorectDigitValue(int& value)
+{
+	bool flag = false;
+	do {
+		if (flag) {
+			cout << "Please re-enter!!!";
+		}flag = false;
+		cin >> value;
+		if (cin.fail())
+		{
+			cin.clear();
+			cin.ignore(32222, '\n');
+		}
+		else
+		{
+			return value;
+		}
+	} while (true);
+}
+
+
+
+
+
+void DisplayPatient(Patient _Patient)
+{
+	printf("\n%s %s %s ", _Patient._FIO->FirstName, _Patient._FIO->SecondName, _Patient._FIO->LastName);
+}
+
+
+void SortFirstName(Patient* Massive, int Dimension)
+{
+	Patient Temp;
+	bool isEqualName	   = true,
+		 isEqualSecondName = true;
+	for (size_t i = 0; i <= Dimension; i++)
+	{
+		for (size_t q = Dimension - 1; q > i; q--)
+		{
+			if (strcmp(Massive[q]._FIO->FirstName, Massive[q - 1]._FIO->FirstName) < 0)
+			{
+				isEqualName = false;
+				Temp = Massive[q];
+				Massive[q] = Massive[q - 1];
+				Massive[q - 1] = Temp;
+			}
+			if (isEqualName && strcmp(Massive[q]._FIO->SecondName, Massive[q - 1]._FIO->SecondName) < 0)
+			{
+				isEqualSecondName = false;
+				Temp = Massive[q];
+				Massive[q] = Massive[q - 1];
+				Massive[q - 1] = Temp;
+			}
+			if (isEqualSecondName && strcmp(Massive[q]._FIO->LastName, Massive[q - 1]._FIO->LastName) < 0)
+			{
+				Temp = Massive[q];
+				Massive[q] = Massive[q - 1];
+				Massive[q - 1] = Temp;
+			}
+		}
+	}
+}
+int& CheckCorectDigitValue(int& value)
+{
+	bool flag = false;
+	do {
+		if (flag) {
+			cout << "Please re-enter!";
+		}flag = false;
+		cin >> value;
+		if (cin.fail())
+		{
+			cin.clear();
+			cin.ignore(32222, '\n');
+		}
+		else
+		{
+			return value;
+		}
+	} while (true);
+}
